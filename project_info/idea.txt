@@ -1,29 +1,26 @@
-Ідея:				
-за мотивами				
+Sources/similar ideas:				
 [1] http://twt.mpei.ac.ru/ochkov/car/car.htm			
 [2] http://mospolytech.ru/science/mami145/scientific/article/s11/s11_11.pdf			
 
-Вибираємо марку і модель авто + можливість звузити пошук за параметрами				
-2 варіанти джерела даних:				
+Choose a car make/model + maybe additional parameters
+Two possible sources of data:
 1) auto.ria.ua				
 2) ebay motors				
 
-... по наявним данним будуємо графіки залежності між				
-а) ціною і віком [1, 2]				
-б) ціною і пробігом [1]				
-в) віком і пробігом (для України у 2 останніх випадках дані по пробігу майже напевно недостовірні :( [1]				
+Build 3 scatter plots with regression curves:
+a) price/age [1, 2]				
+b) price/mileage [1]				
+c) age/mileage (unfortunately for Ukraine mileage parameter is likely to be false :( ) [1]				
 
-Згідно джерела 1, для а і в залежність близька до лінійної, б - експоненційної,				
-згідно джерела 2, залежність між ціною і віком (а) - експоненційна, зниження до деякого мінімуму (через 10-14р), фіксованого для моделі				
-Здоровий глузд підказує, що залежніть ціни від пробігу і віку експоненційна (в адекватних межах значень віку/пробігу)				
+Source [1] says that for a) and c) there might be a linear dependance, for b) - an exponential dependance.
+Source [2] says that price and age have exponential dependance with price going to some minimum level (in 10-14 years) which depends on the model.
 
-Додатково: можна екстраполювати графік а, тим самим прогнозуючи ціну авто черех Х років				
-Розрахунки не обов*язково проводити динамічно - можна з певною періодичністю (напр., 1 р/міс)				
-ebay Finding API - ліміт 5000 запитів/добу				
-				
-eBay Motors				
-https://developer.ebay.com/Devzone/guides/ebayfeatures/Development/Sites-eBayMotors.html				
-Finding API				
-https://developer.ebay.com/Devzone/finding/Concepts/FindingAPIGuide.html				
+common sense dictates that price and mileage/age should have something close to exponential dependance (in a reasonable range of age/mileage).
 
-Загальна ідея і послідовність взаємодії з користувачем - див. scheme.jpg
+User can then enter age/mileage[/price] of his/her car and check how they meet with the general picture.
+
+Extra: we can extrapolate curves to predict car price change in X years.
+
+Calculations can be made either dynamically (but that will probably be quite long) or ahead, periodically (for eg., monthly).
+
+Steps of interaction with user - please, see scheme.jpg
