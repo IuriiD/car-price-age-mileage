@@ -1,0 +1,55 @@
+2CV: 39591
+Acadiane: 1087
+AMI: 1086
+Athena: 124
+AX: 125
+Axel: 44403
+Berlingo груз.: 3344
+Berlingo пасс.: 126
+BX: 127
+C-Crosser: 3451
+C-Elysee: 40442
+C-Zero: 44826
+C1: 2599
+C15: 1085
+C2: 1084
+C3: 128
+C3 Picasso: 32931
+C4: 1082
+C4 Aircross: 47790
+C4 Cactus: 45630
+C4 Picasso: 3487
+C5: 129
+C6: 1081
+C8: 130
+CQ: 36307
+CX: 131
+DS3: 31084
+DS4: 37583
+DS5: 38211
+Dyane: 136
+Evasion: 1079
+Grand C4 Picasso: 3486
+GS: 1078
+GSA: 137
+ID: 1077
+Jumper груз.: 1076
+Jumper пасс.: 31514
+Jumpy груз.: 3489
+Jumpy пасс.: 1075
+LNA: 138
+Nemo груз.: 3345
+Nemo пасс.: 31513
+Oltcit: 2075
+Reflex: 139
+Rosalie: 46861
+Saxo: 140
+Space Tourer: 50383
+Synergie: 141
+Traction Avant: 48209
+Visa: 142
+Xantia: 143
+XM: 144
+Xsara: 145
+Xsara Picasso: 146
+ZX: 147

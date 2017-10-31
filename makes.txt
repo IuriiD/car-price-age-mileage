@@ -1,0 +1,263 @@
+Abarth: 5166
+Acura: 98
+Adler: 2396
+Aero: 5165
+Aixam: 2
+Alfa Romeo: 3
+Alpine: 100
+Altamarea: 3988
+Aro: 101
+Artega: 3105
+Asia: 4
+Aston Martin: 5
+Audi: 6
+Austin: 7
+Austin-Healey: 4355
+Autobianchi: 102
+Avia: 2077
+Baoya: 5245
+Barkas (Баркас): 103
+Baw: 1540
+Beijing: 105
+Bentley: 8
+Bertone: 106
+Bio Auto: 3127
+Blonell: 108
+BMW: 9
+Borgward: 5240
+Brilliance: 329
+Bristol: 10
+Bugatti: 109
+Buick: 110
+BYD: 386
+Cadillac: 11
+Caterham: 3221
+Chana: 407
+Changan: 1580
+Changhe: 1567
+Chery: 190
+Chevrolet: 13
+Chrysler: 14
+Citroen: 15
+Dacia: 17
+Dadi: 198
+Daewoo: 18
+Daf: 115
+DAF / VDL: 1441
+Dagger: 3717
+Daihatsu: 19
+Daimler: 20
+Datsun: 4206
+De Lorean: 3071
+Derways: 4328
+Detroit Electric: 4883
+Dfcz: 4069
+DKW: 2243
+Dodge: 118
+Dongfeng: 308
+Dr. Motor: 5051
+DS: 4495
+Eagle: 120
+Ernst Auwarter: 1413
+Estrima: 3921
+FAW: 121
+Ferrari: 22
+Fiat: 23
+Fiat-Abarth: 4459
+Fisker: 3444
+Ford: 24
+Fornasari: 3104
+FSO: 25
+FUQI: 197
+Gac: 4506
+Geely: 185
+Geo: 2790
+GMC: 123
+Gonow: 183
+Great Wall: 124
+Groz: 1575
+Hafei: 191
+Haima: 3674
+Hanomag: 1784
+Hansa: 2053
+Hindustan: 3411
+Honda: 28
+Huabei: 2595
+Huanghai: 388
+Humber: 3002
+Hummer: 127
+Humvee: 4663
+Hyundai: 29
+Infiniti: 128
+Innocenti: 4273
+Iran Khodro: 3821
+Isuzu: 30
+ItalCar: 3757
+Iveco: 175
+JAC: 317
+Jaguar: 31
+JCB: 1590
+Jeep: 32
+Jiangnan: 335
+Jinbei: 2231
+Jinbei Minibusus: 4549
+JMC: 3018
+Jonway: 1574
+Karosa: 412
+Kia: 33
+King Long: 2676
+KingWoo: 4606
+Kirkham: 4843
+Koenigsegg: 2643
+Konecranes: 4000
+Lamborghini: 35
+Lancia: 36
+Land Rover: 37
+Landwind: 406
+LDV: 134
+Lexus: 38
+Lifan: 334
+Lincoln: 135
+Lotus: 41
+LTI: 136
+Luxgen: 4269
+Marshell: 4064
+Maruti: 139
+Maserati: 45
+Maybach: 46
+Mazda: 47
+McLaren: 3101
+MEGA: 1904
+Mercedes-Benz: 48
+Mercury: 144
+Merkur: 3948
+MG: 49
+Miles: 4528
+MINI: 147
+Mitsubishi: 52
+Mitsuoka: 402
+Morgan: 53
+Morris: 54
+MPM Motors: 5039
+Nissan: 55
+Norster: 2489
+Nysa (Ныса): 2045
+Oldsmobile: 148
+Oltcit: 2963
+Opel: 56
+Packard: 3193
+Pagani: 2644
+Peerless: 1852
+Peg-Perego: 3446
+Peterbilt: 346
+Peugeot: 58
+Pininfarina: 3590
+Pinzgauer: 3215
+Plymouth: 181
+Pontiac: 149
+Porsche: 59
+Praga Baby: 2728
+Proton: 60
+Quicksilver: 1332
+Ram: 4369
+Ravon: 4681
+Renault: 62
+Renault Samsung Motors: 4698
+Rezvani: 4466
+Rimac: 3330
+Rolls-Royce: 63
+Rover: 64
+Saab: 65
+Saipa: 3437
+Saleen: 196
+Samand: 192
+Samson: 3972
+Samsung: 325
+Saturn: 331
+Sceo: 2734
+Scion: 3268
+Seat: 67
+Secma: 2492
+Selena: 1726
+Shelby: 3100
+Shuanghuan: 195
+Sidetracker: 4003
+Skoda: 70
+SMA: 311
+Smart: 71
+SouEast: 194
+Soyat: 3212
+Spyker: 411
+SsangYong: 73
+Star: 214
+Studebaker: 3228
+Subaru: 75
+Sunbeam: 385
+Suzuki: 76
+Talbot: 77
+Tarpan Honker: 2497
+TATA: 78
+Tatra: 204
+Tazzari: 3922
+Tesla: 2233
+Think Global: 4237
+Thunder Tiger: 4033
+Tianma: 1578
+Tiger: 2050
+Tofas: 2552
+Toyota: 79
+Trabant: 345
+Triumph: 80
+TVR: 81
+Ultima: 3017
+Van Hool: 206
+Vauxhall: 82
+Venturi: 83
+Vepr: 3320
+Volkswagen: 84
+Volvo: 85
+Wanderer: 2021
+Wanfeng: 2403
+Wartburg: 339
+Wiesmann: 1992
+Willys: 1820
+Wuling: 2653
+Xiaolong: 3452
+Xin kai: 338
+Yugo: 87
+Zastava: 2309
+Zimmer: 2958
+Zotye: 3610
+Zuk: 3089
+ZX: 322
+Богдан: 188
+Бронто: 3000
+ВАЗ: 88
+ВИС: 90
+ГАЗ: 91
+ГолАЗ: 410
+Детский транспорт: 3636
+Другое: 165
+ЕРАЗ: 170
+Жук: 169
+ЗАЗ: 89
+ЗИЛ: 168
+ЗИМ: 1544
+ЗИС: 186
+ИЖ: 92
+ЛуАЗ: 189
+Москвич / АЗЛК: 94
+Прицеп: 154
+РАФ: 327
+Ретро автомобили: 199
+Самодельный: 2863
+СеАЗ: 96
+СМЗ: 2491
+СПЭВ / SPEV: 1351
+ТагАЗ: 4537
+ТАМ: 341
+ТогАЗ: 2638
+Тренер: 4038
+УАЗ: 93
+Циклон: 4021
+Эстония: 2307
