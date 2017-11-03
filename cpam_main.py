@@ -1,12 +1,14 @@
 import requests
 import json
+import pygal
+from pygal import Config
 from cpam_functions import simplifydic, get_price_age_mileage
 api_key = 'xmDSGYkL0FDq7VTLAMDfOW2AXD5kKZYIlWaUtGqr'
-ads_analysed = 20 # quantity of adverticements requested for analysis
+ads_analysed = 80 # quantity of adverticements requested for analysis
 
 # TEMPORARY: Here go variables that will be entered by a user via form
-make_needed = 'Citroen'
-model_needed = 'Berlingo пасс.'
+make_needed = 'Opel'
+model_needed = 'Zafira'
 
 
 # 1. Get a list of makes and corresponding make IDs
@@ -58,3 +60,19 @@ for adsid in adsIDlist:
 with open(make_needed + ' ' + model_needed + '.txt', 'w') as fh:
     for innerdic in finaldata:
         fh.write('[' + str(innerdic[0]) + ', ' + str(innerdic[1]) + ', ' + str(innerdic[2]) + ']' + '\n')
+# create list of tuples - [(price1, age1), (price2, age2), ...]
+price_age_XY = []
+for innerdic in finaldata:
+    price_age_XY.append((innerdic[0], innerdic[1]))
+print(price_age_XY)
+
+# 7. Draw charts using pygal
+config = Config()
+config.show_legend = False
+config.human_readable = True
+config.fill = False
+chart = pygal.XY(config)
+
+scatt_chart = pygal.XY(config, stroke=False)
+scatt_chart.add('', price_age_XY)
+scatt_chart.render_to_file('price_age.svg')
