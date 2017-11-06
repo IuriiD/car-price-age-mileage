@@ -3,7 +3,7 @@ import json
 import pygal
 from cpam_functions import simplifydic, get_price_age_mileage
 api_key = 'xmDSGYkL0FDq7VTLAMDfOW2AXD5kKZYIlWaUtGqr'
-ads_analysed = 50 # quantity of adverticements requested for analysis
+ads_analysed = 5 # quantity of adverticements requested for analysis
 
 # TEMPORARY: Here go variables that will be entered by a user via form
 make_needed = 'Citroen' # 'Opel'
@@ -48,32 +48,40 @@ for id in adsIDstr:
     adsIDlist.append(int(id))
 print(adsIDlist)
 
-# 6. For each adsID request the adverticement and select price($), year and mileage(x1000km)
+# 6. For each adsID request the adverticement and select ads ID, price($), year and mileage(x1000km)
 finaldata = [] # list in format [[adsID1, price$1, year1, mileage1], [adsID2, price$2, year2, mileage2], ...]
 for adsid in adsIDlist:
     r4 = requests.get('https://developers.ria.com/auto/info?api_key=' + api_key + '&auto_id=' + str(adsid))
     parsed_ads = json.loads(r4.text)
     finaldata.append(get_price_age_mileage(parsed_ads))
 
+print('finaldata',finaldata)
+
 # 7. Draw charts
-# 7.1 Prepare datasets (lists of tuples - [(price1, age1), (price2, age2), ...]) for scatter charts
-price_age_data = []
+# 7.1 Prepare datasets (lists of lists - [[ads_id1, price1, age1], [ads_id2, price2, age2], ...]) for scatter charts
+'''price_age_data = []
 price_mileage_data = []
 age_mileage_data = []
 for innerdic in finaldata:
-    price_age_data.append((innerdic[1], innerdic[0]))
-    price_mileage_data.append((innerdic[2], innerdic[0]))
-    age_mileage_data.append((innerdic[2], innerdic[1]))
+    price_age_data.append((innerdic[0], innerdic[2], innerdic[1]))
+    price_mileage_data.append((innerdic[0], innerdic[3], innerdic[1]))
+    age_mileage_data.append((innerdic[0], innerdic[3], innerdic[2]))
 print(price_age_data)
 print(price_mileage_data)
-print(age_mileage_data)
+print(age_mileage_data)'''
 
 # 7.2 Draw charts using pygal
-# Age-Price
 price_age_XY = pygal.XY(stroke=False, show_legend=False, human_readable=True, fill=False, title=u'Price($) vs. Age (years): '+make_needed+'-'+model_needed, x_title='Age (years)', y_title='Price ($)',tooltip_border_radius=10, dots_size=5)
-price_age_XY.add('', price_age_data)
+price_mileage_XY = pygal.XY(stroke=False, show_legend=False, human_readable=True, fill=False, title=u'Price($) vs. Mileage (x1000km): '+make_needed+'-'+model_needed, x_title='Mileage (x1000km)', y_title='Price ($)',tooltip_border_radius=10, dots_size=5)
+mileage_age_XY = pygal.XY(stroke=False, show_legend=False, human_readable=True, fill=False, title=u'Age (years) vs. Mileage (x1000km): '+make_needed+'-'+model_needed, x_title='Mileage (x1000km)', y_title='Age (years)',tooltip_border_radius=10, dots_size=5)
+for every_ads in finaldata:
+    price_age_XY.add(str(every_ads[0]), [[every_ads[2], every_ads[1]]])
+    price_mileage_XY.add(str(every_ads[0]), [[every_ads[3], every_ads[1]]])
+    mileage_age_XY.add(str(every_ads[0]), [[every_ads[3], every_ads[2]]])
 price_age_XY.render_to_file(make_needed+'-'+model_needed+'-'+'price_age.svg')
-
+price_mileage_XY.render_to_file(make_needed+'-'+model_needed+'-'+'price_mileage.svg')
+mileage_age_XY.render_to_file(make_needed+'-'+model_needed+'-'+'age_mileage.svg')
+'''
 # Mileage-Price
 price_mileage_XY = pygal.XY(stroke=False, show_legend=False, human_readable=True, fill=False, title=u'Price($) vs. Mileage (x1000km): '+make_needed+'-'+model_needed, x_title='Mileage (x1000km)', y_title='Price ($)',tooltip_border_radius=10, dots_size=5)
 price_mileage_XY.add('', price_mileage_data)
@@ -83,3 +91,4 @@ price_mileage_XY.render_to_file(make_needed+'-'+model_needed+'-'+'price_mileage.
 mileage_age_XY = pygal.XY(stroke=False, show_legend=False, human_readable=True, fill=False, title=u'Age (years) vs. Mileage (x1000km): '+make_needed+'-'+model_needed, x_title='Mileage (x1000km)', y_title='Age (years)',tooltip_border_radius=10, dots_size=5)
 mileage_age_XY.add('', age_mileage_data)
 mileage_age_XY.render_to_file(make_needed+'-'+model_needed+'-'+'age_mileage.svg')
+'''
