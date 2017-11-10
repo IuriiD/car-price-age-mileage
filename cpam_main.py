@@ -57,20 +57,7 @@ for adsid in adsIDlist:
 
 print('finaldata',finaldata)
 
-# 7. Draw charts
-# 7.1 Prepare datasets (lists of lists - [[ads_id1, price1, age1], [ads_id2, price2, age2], ...]) for scatter charts
-'''price_age_data = []
-price_mileage_data = []
-age_mileage_data = []
-for innerdic in finaldata:
-    price_age_data.append((innerdic[0], innerdic[2], innerdic[1]))
-    price_mileage_data.append((innerdic[0], innerdic[3], innerdic[1]))
-    age_mileage_data.append((innerdic[0], innerdic[3], innerdic[2]))
-print(price_age_data)
-print(price_mileage_data)
-print(age_mileage_data)'''
-
-# 7.2 Draw charts using pygal
+# 7. Draw charts using pygal
 price_age_XY = pygal.XY(stroke=False, show_legend=False, human_readable=True, fill=False, title=u'Price($) vs. Age (years): '+make_needed+'-'+model_needed, x_title='Age (years)', y_title='Price ($)',tooltip_border_radius=10, dots_size=5)
 price_mileage_XY = pygal.XY(stroke=False, show_legend=False, human_readable=True, fill=False, title=u'Price($) vs. Mileage (x1000km): '+make_needed+'-'+model_needed, x_title='Mileage (x1000km)', y_title='Price ($)',tooltip_border_radius=10, dots_size=5)
 mileage_age_XY = pygal.XY(stroke=False, show_legend=False, human_readable=True, fill=False, title=u'Age (years) vs. Mileage (x1000km): '+make_needed+'-'+model_needed, x_title='Mileage (x1000km)', y_title='Age (years)',tooltip_border_radius=10, dots_size=5)
@@ -81,14 +68,3 @@ for every_ads in finaldata:
 price_age_XY.render_to_file(make_needed+'-'+model_needed+'-'+'price_age.svg')
 price_mileage_XY.render_to_file(make_needed+'-'+model_needed+'-'+'price_mileage.svg')
 mileage_age_XY.render_to_file(make_needed+'-'+model_needed+'-'+'age_mileage.svg')
-'''
-# Mileage-Price
-price_mileage_XY = pygal.XY(stroke=False, show_legend=False, human_readable=True, fill=False, title=u'Price($) vs. Mileage (x1000km): '+make_needed+'-'+model_needed, x_title='Mileage (x1000km)', y_title='Price ($)',tooltip_border_radius=10, dots_size=5)
-price_mileage_XY.add('', price_mileage_data)
-price_mileage_XY.render_to_file(make_needed+'-'+model_needed+'-'+'price_mileage.svg')
-
-# Age-Mileage
-mileage_age_XY = pygal.XY(stroke=False, show_legend=False, human_readable=True, fill=False, title=u'Age (years) vs. Mileage (x1000km): '+make_needed+'-'+model_needed, x_title='Mileage (x1000km)', y_title='Age (years)',tooltip_border_radius=10, dots_size=5)
-mileage_age_XY.add('', age_mileage_data)
-mileage_age_XY.render_to_file(make_needed+'-'+model_needed+'-'+'age_mileage.svg')
-'''
