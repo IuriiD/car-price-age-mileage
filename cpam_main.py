@@ -1,13 +1,15 @@
 import requests
 import json
 import pygal
+import pymongo
+from pymongo import MongoClient
 from cpam_functions import simplifydic, get_price_age_mileage
-api_key = 'xmDSGYkL0FDq7VTLAMDfOW2AXD5kKZYIlWaUtGqr'
-ads_analysed = 5 # quantity of adverticements requested for analysis
+from keys import api_key
+ads_analysed = 50 # quantity of adverticements requested for analysis
 
 # TEMPORARY: Here go variables that will be entered by a user via form
-make_needed = 'Citroen' # 'Opel'
-model_needed = 'Berlingo пасс.' # 'Zafira'
+make_needed = 'Citroen' #'Opel'
+model_needed = 'Berlingo пасс.' #'Zafira'
 
 # 1. Get a list of makes and corresponding make IDs
 r1 = requests.get('https://developers.ria.com/auto/categories/1/marks?api_key=' + api_key)
@@ -39,7 +41,7 @@ for key, value in modelsdic.items():
     if key == model_needed:
         modelID = value
 
-# 5. For given model ID get at least X (for eg., 50-100) or all existing adverticements' ID
+# 5. For given model ID get at least ads_analysed (for eg., 50-100) or all existing adverticements' ID
 r3 = requests.get('https://developers.ria.com/auto/search?api_key=' + api_key + '&category_id=1&marka_id=' + str(makeID) + '&model_id=' + str(modelID) + '&countpage=' + str(ads_analysed))
 parsed_IDs = json.loads(r3.text)
 adsIDlist = []
@@ -55,16 +57,39 @@ for adsid in adsIDlist:
     parsed_ads = json.loads(r4.text)
     finaldata.append(get_price_age_mileage(parsed_ads))
 
-print('finaldata',finaldata)
 
-# 7. Draw charts using pygal
+# Originally database was not used and finaldata list was used to build charts
+# But let's save data to a MongoDB database, then request it from there and build charts
+
+# 7. Prepare dictionary for saving data to MongoDB
+finaldatajson = []
+for ads in finaldata:
+    finaldatajson.append({'ads_id': ads[0], 'price': ads[1], 'age': ads[2], 'mileage': ads[3]})
+
+print('finaldata',finaldata)
+print('finaldatajson',finaldatajson)
+
+# 8. Save data to DB
+client = MongoClient()
+db = client.autodatabase
+posts = db.posts
+result = posts.insert_many(finaldatajson)
+
+# 9. Retrieve data from DB and store it to a list of lists [[adsID1, price$1, year1, mileage1], [adsID2, price$2, year2, mileage2], ...]
+datafromdb = []
+for post in posts.find():
+    datafromdb.append([post['ads_id'], post['price'], post['age'], post['mileage']])
+print(datafromdb)
+
+# 10. Draw charts using pygal
 price_age_XY = pygal.XY(stroke=False, show_legend=False, human_readable=True, fill=False, title=u'Price($) vs. Age (years): '+make_needed+'-'+model_needed, x_title='Age (years)', y_title='Price ($)',tooltip_border_radius=10, dots_size=5)
 price_mileage_XY = pygal.XY(stroke=False, show_legend=False, human_readable=True, fill=False, title=u'Price($) vs. Mileage (x1000km): '+make_needed+'-'+model_needed, x_title='Mileage (x1000km)', y_title='Price ($)',tooltip_border_radius=10, dots_size=5)
 mileage_age_XY = pygal.XY(stroke=False, show_legend=False, human_readable=True, fill=False, title=u'Age (years) vs. Mileage (x1000km): '+make_needed+'-'+model_needed, x_title='Mileage (x1000km)', y_title='Age (years)',tooltip_border_radius=10, dots_size=5)
-for every_ads in finaldata:
+for every_ads in datafromdb:
     price_age_XY.add(str(every_ads[0]), [[every_ads[2], every_ads[1]]])
     price_mileage_XY.add(str(every_ads[0]), [[every_ads[3], every_ads[1]]])
     mileage_age_XY.add(str(every_ads[0]), [[every_ads[3], every_ads[2]]])
 price_age_XY.render_to_file(make_needed+'-'+model_needed+'-'+'price_age.svg')
 price_mileage_XY.render_to_file(make_needed+'-'+model_needed+'-'+'price_mileage.svg')
 mileage_age_XY.render_to_file(make_needed+'-'+model_needed+'-'+'age_mileage.svg')
+# readjusting git
