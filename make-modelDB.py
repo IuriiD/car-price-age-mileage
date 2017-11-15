@@ -12,7 +12,9 @@ model_needed = 'Berlingo пасс.' #'Zafira'
 client = MongoClient()
 db = client.makemodels
 cll = db.cll
+mkkcll = db.makes
 cll.drop()
+mkkcll.drop()
 
 # 1. Get a list of makes and corresponding make IDs
 r1 = requests.get('https://developers.ria.com/auto/categories/1/marks?api_key=' + api_key)
@@ -60,7 +62,11 @@ def storemakemodeldata(makename, makeID):
 
 
 # 3. Iterate throgh makes dictionary, get make name and ID and execute function for storing models for that make to DB
+# Also store makes list in a separate collection
+makes = []
 for key, value in makesdic.items():
     makename = key
     makeID = value
+    makes.append({'make': key})
     storemakemodeldata(makename, makeID)
+result = mkkcll.insert_many(makes)
