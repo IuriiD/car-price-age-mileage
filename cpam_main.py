@@ -1,11 +1,8 @@
-import requests
-import json
-import pygal
-import pymongo
+import requests, json, pygal
 from pymongo import MongoClient
 from cpam_functions import simplifydic, get_price_age_mileage
 from keys import api_key
-ads_analysed = 50 # quantity of adverticements requested for analysis
+ads_analysed = 5 # quantity of adverticements requested for analysis
 
 # TEMPORARY: Here go variables that will be entered by a user via form
 make_needed = 'Citroen' #'Opel'
