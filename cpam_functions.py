@@ -13,7 +13,7 @@ def simplifydic(inputlist):
         outputdic[everydic['name']] = everydic['value']
     return(outputdic)
 
-# Function takes parsed json, selects and returns a list [price$, year, mileage]
+# Function takes parsed json, selects and returns a list [ads_id, price$, year, mileage]
 def get_price_age_mileage(parsedjson):
     #print(parsedjson)
     now = datetime.datetime.now()
@@ -22,9 +22,11 @@ def get_price_age_mileage(parsedjson):
     price = 0
     age = 0
     mileage = 0
+    updated = ''
+    updated = parsedjson['updateDate']
     adsid = parsedjson['autoData']['autoId']
     price = parsedjson['USD']
     age = curr_year - parsedjson['autoData']['year']
     mileage = parsedjson['autoData']['raceInt']
-    outputlist = [adsid, price, age, mileage]
+    outputlist = [adsid, price, age, mileage, updated]
     return outputlist

@@ -16,15 +16,37 @@
     <br>
     <h4>Car-Price-Age-Mileage (v.0.3)</h4>
     <h6><a href="{{ url_for('index') }}">Back to models list</a> / {{ make }} - {{ model }}</h6>
+
+    <!-- If we don't have any data, there will be no charts -->
+    {% if nodata==True %}
+    <div class="alert alert-danger" role="alert">
+      Sorry, but <a href="https://auto.ria.com/" target="_blank">auto.ria.ua</a> has no adverticements for this model. Please <a href="{{ url_for('index') }}">choose</a> another model.
+    </div>
+    {% endif %}
+
+    <!-- If we have some data, let's display charts -->
+    {% if nodata==False %}
+
+    <!-- Show an alert if we have less than 5 ads -->
+    {% if toofewads==True %}
+    <div class="alert alert-warning" role="alert">
+      There are very few ads on <a href="https://auto.ria.com/" target="_blank">auto.ria.ua</a> for this model - charts may be misleading.
+    </div>
+    {% endif %}
+
     <p>
-      <img src="{{ ch_pa }}">
+      <img src="{{ ch_pa }}" width="600" height="600">
     </p>
     <p>
-      <img src="{{ ch_pm }}">
+      <img src="{{ ch_pm }}" width="600" height="600">
     </p>
     <p>
-      <img src="{{ ch_ma }}">
+      <img src="{{ ch_ma }}" width="600" height="600">
     </p>
+     {% endif %}
+      <div class="alert alert-light" role="alert">
+        Made using <a href="https://auto.ria.com/" target="_blank">auto.ria.ua</a> <a href="https://github.com/ria-com/auto-ria-rest-api" target="_blank">API</a>
+      </div>
   </div>
 
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
