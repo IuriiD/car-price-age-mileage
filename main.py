@@ -7,11 +7,12 @@
 # we look for a collection for a given model, then for a specific ads ID and then check if ads document exists more than
 # 1 day. If so we update this ads document else we use it as is.
 
+import requests, json, pygal
 from flask import Flask, render_template, url_for
 from flask_bootstrap import Bootstrap
 from pymongo import MongoClient
-import requests, json, pygal
 from cpam_functions import simplifydic, get_price_age_mileage
+from random import randint
 from keys import api_key
 ads_analysed = 5 # quantity of adverticements requested for analysis
 
@@ -77,23 +78,69 @@ def getcharts(make, model):
     # If we have at least 1 ads for a given model, proceed:
     else:
         # Get price/age/mileage data for each ads
-        finaldata = []  # list in format [[adsID1, price$1, year1, mileage1, updated1], [adsID2, price$2, year2, mileage2, updated2], ...]
+        finaldatajson = []  # list of dictionaries in format [{'ads_id': ads1id, 'price': price1, 'age': age1, 'mileage': mileage1}, {'ads_id': ads2id, 'price': price2, 'age': age2, 'mileage': mileage2}, ...]
         for adsid in adsIDlist:
             r4 = requests.get('https://developers.ria.com/auto/info?api_key=' + api_key + '&auto_id=' + str(adsid))
             parsed_ads = json.loads(r4.text)
-            finaldata.append(get_price_age_mileage(parsed_ads))
+            finaldatajson.append(get_price_age_mileage(parsed_ads))
 
-        # Save price-age-mileage data to DB
-        finaldatajson = []
-        for ads in finaldata:
-            finaldatajson.append({'ads_id': ads[0], 'price': ads[1], 'age': ads[2], 'mileage': ads[3]})
-        mymodel = db.mymodel  # Collection of documents with price/age/mileage data for a given model
-        mymodel.drop()
-        result = mymodel.insert_many(finaldatajson)
+        # So now we have a list of ads requested from auto.ria.ua
+        # Let's check if we already have a collection of ads for this model (named 'makeID-modelID')
+        collectionname = str(makeID)+'-'+str(modelID)
+        if collectionname in db.collection_names():
+            # If 'yes', let's retrieve these data from db,
+            alreadyindb = [] # list of dictionaries in format [{'ads_id': ads1id, 'price': price1, 'age': age1, 'mileage': mileage1}, {'ads_id': ads2id, 'price': price2, 'age': age2, 'mileage': mileage2}, ...]
+            for post in db[collectionname].find():
+                alreadyindb.append({'ads_id': post['ads_id'], 'price': post['price'], 'age': post['age'], 'mileage': post['mileage']})
+            # we may have 1) new ads that are absent in db, 2) ads that's already in db and 3) ads in db that were absent in our request
+            # we shall add to db ads belonging to cat. #1, update if needed, ads cat. #2 and delete ads cat. #3
+            # Iterate through our existing data
+            for dic in alreadyindb:
+                oldadsID = dic['ads_id']
 
-        # Retrieve price-age-mileage data from DB
+                # Retrieve our new ads with the same ID
+                newads = next((item for item in finaldatajson if item["ads_id"] == oldadsID), False)
+                # If a document for ads that's already in our db coinsides with a requested ads - update it if needed (price, age, mileage)
+                if newads:
+                    # Our old ads = 'dic'
+                    # Get old price, age, mileage
+                    pricewas = dic['price']
+                    agewas = dic['age']
+                    mileagewas = dic['mileage']
+                    # Get new price, age, mileage
+                    newprice = newads['price']
+                    newage = newads['age']
+                    newmileage = newads['mileage']
+                    priceflag, ageflag, mileageflag = False, False, False
+                    datatoupdate = {}
+                    if pricewas!=newprice:
+                        datatoupdate['price']=newprice
+                        priceflag = True
+                    if agewas!=newage:
+                        datatoupdate['age']=newage
+                        ageflag = True
+                    if mileagewas!=newmileage:
+                        datatoupdate['mileage']=newmileage
+                        mileageflag = True
+                    if priceflag or ageflag or mileageflag:
+                        db[collectionname].update_one({'ads_id': oldadsID}, {'$set': datatoupdate}) # Go update the document in db with new values
+                # If we have a document in our collection which is absent in our new request - delete it from collection
+                else:
+                    db[collectionname].delete_one({'ads_id': oldadsID})
+            # Also we have to iterate through our new ads to find such ones that were'nt added to our collection yet and add them
+            for dic in finaldatajson:
+                newadsID = dic['ads_id']
+                if not next((item for item in alreadyindb if item["ads_id"] == newadsID), False):
+                    db[collectionname].insert_one(dic)
+
+        # If we don't have a collection of ads for this model, create it and populate with ads
+        else:
+            result = db[collectionname].insert_many(finaldatajson)
+
+
+        # Let's draw charts. Retrieve price-age-mileage data from DB
         datafromdb = []
-        for post in mymodel.find():
+        for post in db[collectionname].find():
             datafromdb.append([post['ads_id'], post['price'], post['age'], post['mileage']])
 
         # Draw charts using pygal lib
@@ -116,9 +163,9 @@ def getcharts(make, model):
         price_age_XY.render_to_file(ch_pa)
         price_mileage_XY.render_to_file(ch_pm)
         mileage_age_XY.render_to_file(ch_ma)#
-        ch_pa = '/' + ch_pa
-        ch_pm = '/' + ch_pm
-        ch_ma = '/' + ch_ma
+        ch_pa = '/' + ch_pa + '?' + str(randint(1,10000))
+        ch_pm = '/' + ch_pm + '?' + str(randint(1,10000))
+        ch_ma = '/' + ch_ma + '?' + str(randint(1,10000))
         # Render page using saved charts (need to decide what to do with them next)
         # But before let's check if quantity of ads is less than 5 (too little) and display additional notice for user
         if toofewads==True:
