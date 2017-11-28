@@ -14,7 +14,7 @@ from pymongo import MongoClient
 from cpam_functions import simplifydic, get_price_age_mileage
 from random import randint
 from keys import api_key
-ads_analysed = 5 # quantity of adverticements requested for analysis
+ads_analysed = 20 # quantity of adverticements requested for analysis
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
