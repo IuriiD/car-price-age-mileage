@@ -8,12 +8,12 @@
 # 1 day. If so we update this ads document else we use it as is.
 
 import requests, json, pygal
-from flask import Flask, render_template, url_for
+from flask import Flask, render_template, url_for, session, request, redirect
 from flask_bootstrap import Bootstrap
 from pymongo import MongoClient
 from cpam_functions import simplifydic, get_price_age_mileage
 from random import randint
-from keys import api_key
+from keys import api_key, useradmin, sessionskey
 ads_analysed = 20 # quantity of adverticements requested for analysis
 
 app = Flask(__name__)
@@ -43,8 +43,14 @@ def index():
         # Make a list in format [[make_name1, [model_name1, model_name2, model_name3, ...]], [make_name2, [model_name1, model_name2, model_name3, ...]], ...]
         makemodellist.append([make, sorted(models4make)])
         makemodellist = sorted(makemodellist)
+
+    # Check if logged in to render 'Login' or  'Cabinet | Logout' links in header
+    logged = False
+    if 'username' in session:
+        logged = True
+
     # Render html with our list passed
-    return render_template('index.html', makemodellist=makemodellist)
+    return render_template('index.html', makemodellist=makemodellist, logged=logged)
 
 # A page with charts for a model chosen by user
 @app.route('/<make>/<model>')
@@ -174,6 +180,36 @@ def getcharts(make, model):
         else:
             return render_template('charts.html', nodata=False, toofewads=False, make=make, model=model, ch_pa=ch_pa,
                                    ch_pm=ch_pm, ch_ma=ch_ma)
+
+# Dealing with sessions
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        if request.form['username']==useradmin:
+            session['username'] = request.form['username']
+            return redirect(url_for('cabinet'))
+    return '''
+        <form method="post">
+            <p><input type=text name=username>
+            <p><input type=submit value=Login>
+        </form>
+    '''
+
+@app.route('/logout')
+def logout():
+    # remove the username from the session if it's there
+    session.pop('username', None)
+    return redirect(url_for('index'))
+
+@app.route('/cabinet')
+def cabinet():
+    if 'username' in session:
+        return render_template('cabinet.html')
+    else:
+        return redirect(url_for('login'))
+
+# set the secret key
+app.secret_key = sessionskey
 
 # Run Flask server (host='0.0.0.0' - for Vagrant)
 if __name__ == '__main__':

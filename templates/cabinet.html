@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <title>Correlation of car's age, mileage and price - data from auto.ria.ua</title>
+    <title>Private cabinet</title>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -15,24 +15,11 @@
   <div class="container">
       <br>
       <h4>Car-Price-Age-Mileage (v.0.3)</h4>
-      {% if logged %}
-      <h6><a href="{{ '/cabinet' }}">Cabinet</a> | <a href="{{ url_for('logout') }}">Logout</a></h6>
-      {% endif %}
-      {% if not logged %}
-      <h6><a href="{{ url_for('login') }}">Login</a></h6>
-      {% endif %}
-      <h6>Please choose a model from the list below:</h6>
-      {% for makemodel in makemodellist %}
-      <h4><b>{{ makemodel[0] }} </b></h4>
-        {% for model in makemodel[1] %}
-        <a href="{{ model }}">{{ model }}</a><br>
-        {% endfor %}
+      <h4>This is a private cabinet:</h4>
+       <h6><a href="{{ url_for('index') }}">Back to models list</a> | <a href="{{ url_for('logout') }}">Logout</a></h6>
       <br>
-        <!-- <button type="button" class="btn btn-light">{{ makemodel }}</button> -->
-      {% endfor %}
-      <div class="alert alert-light" role="alert">
-        Made using <a href="https://auto.ria.com/" target="_blank">auto.ria.ua</a> <a href="https://github.com/ria-com/auto-ria-rest-api" target="_blank">API</a>
-      </div>
+      <h6>Here you will be able to change some parameters like quantity of adverticements used for plotting</h6>
+
   </div>
 
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
