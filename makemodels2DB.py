@@ -28,7 +28,21 @@ parsed_makes = json.loads(r1.text)
 # to a dictionary like {'Make1': ID1, 'Make2': ID2, ...}
 makesdic = simplifydic(parsed_makes)
 
-print('Our makes list:')
+print('Our makes list with slashes:')
+print(makesdic)
+
+# A number of makes names were found with a slash ('Москвич / АЗЛК', 'СПЭВ / SPEV', 'РАФ / VDL')
+# that cause problems with links management in Flask further
+# Let's change them from 'Name / Synonim' to 'Name (Synonim)'
+for key in makesdic.keys():
+    if ' / ' in key:
+        syn1 = key[:key.index(' / ')]
+        syn2 = key[key.index(' / ')+3:]
+        newkey = syn1 + ' (' + syn2 + ')'
+        makesdic[newkey] = makesdic[key]
+        del makesdic[key]
+
+print('Our final makes list:')
 print(makesdic)
 
 # 2. Function takes make name and 1) requests a list of models/modelIDs for it, 2) parces it, 3) prepares a list of
