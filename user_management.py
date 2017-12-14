@@ -1,9 +1,12 @@
 from flask import Flask, request, render_template, url_for, redirect, session, flash
-from wtforms import Form, StringField, PasswordField, validators
+from wtforms import Form, StringField, PasswordField, SubmitField, validators
+from flask_bootstrap import Bootstrap
 from pymongo import MongoClient
 from passlib.hash import sha256_crypt
 
 app = Flask(__name__)
+bootstrap = Bootstrap(app)
+app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 
 class RegistrationForm(Form):
     username = StringField('Username', [validators.Length(min=4, max=20)])
@@ -20,14 +23,13 @@ class LoginForm(Form):
 
 @app.route('/')
 def index():
-    message = 'Index page (direct request)'
-    return render_template('hello.html', message=message)
+    flash('Index page (direct request). <a href="/register/">Register</a> or <a href="/login/">login</a>', 'alert alert-primary')
+    return render_template('hello.html')
 
 @app.route('/register/', methods=['GET', 'POST'])
 def register():
     try:
         form = RegistrationForm(request.form)
-        message = ''
 
         # registration data have been submitted (POST)
         if request.method == 'POST' and form.validate():
@@ -41,27 +43,27 @@ def register():
 
             # Let's check if username isn't already in our collection
             if users.find_one({'username': username}) or users.find_one({'email': email}):
-                message = 'Sorry, but this username or email are already taken. Please choose different credentials'
-                return render_template('register.html', form=form, message=message)
+                flash('Sorry, but this username or email are already taken. Please choose different credentials', 'alert alert-warning')
+                return render_template('register.html', form=form)
             else:
                 users.insert_one({'username': username, 'email': email, 'password': password, 'status': 'active'})
                 session['logged in'] = True
                 session['username'] = username
-                message = 'Registration successfull!'
-                return render_template('hello.html', message=message)
+                flash('Registration successfull! <a href="#">Logout</a> or <a href="/">back to main page</a>', 'alert alert-success')
+                return render_template('hello.html')
 
         # the first (GET) request for a registration form
         return render_template('register.html', form=form)
 
     except Exception as e:
         # 2be removed in final version
-        return render_template('hello.html', message=e)
+        flash(e, 'alert alert-danger')
+        return render_template('hello.html')
 
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
     try:
         loginform = LoginForm(request.form)
-        message = ''
 
         # login data have been submitted (POST)
         if request.method == 'POST' and loginform.validate():
@@ -82,32 +84,29 @@ def login():
                 docID = users.find_one({'email': usernameoremail}).get('_id')
                 username = users.find_one({'_id': docID})['username']
             else:
-                message = 'Sorry, we do not recognize this username or email address. Please choose different credentials or <a href="/register/">register</a>'
-                return render_template('login.html', loginform=loginform, message=message)
+                flash('Sorry, we do not recognize this username or email address. Please choose different credentials or <a href="/register/">register</a>', 'alert alert-warning')
+                return render_template('login.html', loginform=loginform)
+
             # and then let's check for a password
             pwd_should_be = users.find_one({'_id': docID})['password']
-            #message = 'Password should be<br>' + pwd_should_be + '<br>and it is<br>' + password
-            #return render_template('hello.html', message=message)
             if sha256_crypt.verify(password, pwd_should_be):
                 session['logged in'] = True
                 session['username'] = username
-                message = 'Login successfull!'
-                return render_template('hello.html', message=message)
+                flash('Login successfull! <a href="#">Logout</a> or <a href="/">back to main page</a>', 'alert alert-success')
+                return render_template('hello.html')
             # invalid password
             else:
-                message = 'Wrong password'
-                return render_template('login.html', loginform=loginform, message=message)
+                flash('Wrong password', 'alert alert-danger')
+                return render_template('login.html', loginform=loginform)
 
         # the first (GET) request for a login form
         return render_template('login.html', loginform=loginform)
 
     except Exception as e:
         # 2be removed in final version
-        return render_template('hello.html', message=e)
+        flash(e, 'alert alert-danger')
+        return render_template('hello.html')
 
-
-
-app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 
 # Run Flask server (host='0.0.0.0' - for Vagrant)
 if __name__ == '__main__':
