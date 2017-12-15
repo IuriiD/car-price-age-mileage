@@ -3,6 +3,7 @@ from wtforms import Form, StringField, PasswordField, SubmitField, validators
 from flask_bootstrap import Bootstrap
 from pymongo import MongoClient
 from passlib.hash import sha256_crypt
+from functools import wraps
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
@@ -20,6 +21,16 @@ class RegistrationForm(Form):
 class LoginForm(Form):
     usernameoremail = StringField('Username or Email Address', [validators.DataRequired()])
     password = PasswordField('Password', [validators.DataRequired()])
+
+def login_required(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if 'logged_in' in session:
+            return f(*args, **kwargs)
+        else:
+            flash('Yoy need to login first', 'alert alert-warning')
+            return redirect(url_for('login'))
+    return wrap
 
 @app.route('/')
 def index():
@@ -47,9 +58,9 @@ def register():
                 return render_template('register.html', form=form)
             else:
                 users.insert_one({'username': username, 'email': email, 'password': password, 'status': 'active'})
-                session['logged in'] = True
+                session['logged_in'] = True
                 session['username'] = username
-                flash('Registration successfull! <a href="#">Logout</a> or <a href="/">back to main page</a>', 'alert alert-success')
+                flash('Registration successfull! <a href="/logout/">Logout</a> or <a href="/">back to main page</a>', 'alert alert-success')
                 return render_template('hello.html')
 
         # the first (GET) request for a registration form
@@ -90,9 +101,9 @@ def login():
             # and then let's check for a password
             pwd_should_be = users.find_one({'_id': docID})['password']
             if sha256_crypt.verify(password, pwd_should_be):
-                session['logged in'] = True
+                session['logged_in'] = True
                 session['username'] = username
-                flash('Login successfull! <a href="#">Logout</a> or <a href="/">back to main page</a>', 'alert alert-success')
+                flash('Login successfull! <a href="/logout/">Logout</a> or <a href="/">back to main page</a>', 'alert alert-success')
                 return render_template('hello.html')
             # invalid password
             else:
@@ -100,6 +111,11 @@ def login():
                 return render_template('login.html', loginform=loginform)
 
         # the first (GET) request for a login form
+        '''if not session['logged in']:
+            return render_template('login.html', loginform=loginform)
+        else:
+            flash('You are already logged in. <a href="/logout/">Logout</a>', 'alert alert-warning')
+            return redirect(url_for('index'))'''
         return render_template('login.html', loginform=loginform)
 
     except Exception as e:
@@ -107,6 +123,12 @@ def login():
         flash(e, 'alert alert-danger')
         return render_template('hello.html')
 
+@app.route('/logout/')
+@login_required
+def logout():
+    session.clear()
+    flash('You have been logged out', 'alert alert-success')
+    return redirect(url_for('index'))
 
 # Run Flask server (host='0.0.0.0' - for Vagrant)
 if __name__ == '__main__':
