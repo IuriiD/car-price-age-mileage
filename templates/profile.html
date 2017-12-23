@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% from '_formhelpers.html' import render_field %}
+
+{% block body %}
+
+<form role="form" action="/profile/" method="POST">
+  <dl>
+    {{ render_field(profileform.username) }}
+    {{ render_field(profileform.email) }}
+    {{ render_field(profileform.language) }}
+    {{ render_field(profileform.description) }}
+  </dl>
+  <button type="submit" name="submit" class="btn btn-primary" value="Form sent">Save</button>
+</form>
+
+{% endblock %}
