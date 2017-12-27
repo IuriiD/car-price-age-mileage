@@ -4,6 +4,12 @@
 {% block title %}Login{% endblock %}
 
 {% block body %}
+<div align="right">
+  {% if session['username'] %}
+    <b>{{ session['username'] }}: </b>
+  {% endif %}
+  <a href="/">Main page</a>
+</div>
 
 <form role="form" action="/login/" method="POST">
   <dl>

@@ -50,6 +50,11 @@ class UploadForm(Form):
 class PasswordReset(Form):
     email = StringField('Email Address', validators=[Length(6, 50), DataRequired(), Email()])
 
+class PasswordUpdate(Form):
+    oldpassword = PasswordField('Old password', validators=[DataRequired()])
+    newpassword = PasswordField('New password', validators=[DataRequired(), EqualTo('confirm', message='Passwords must match')])
+    confirm = PasswordField('Repeat new password')
+
 def login_required(f):
     @wraps(f)
     def wrap(*args, **kwargs):
@@ -150,7 +155,7 @@ def login():
             if sha256_crypt.verify(password, pwd_should_be):
                 session['logged_in'] = True
                 session['username'] = username
-                flash('Login successfull! <a href="/logout/">Logout</a> or go to <a href="/profile">profile</a>', 'alert alert-success')
+                flash('Login successfull! <a href="/logout/">Logout</a>, go to <a href="/profile">profile</a> or <a href="/password_update">change password</a>', 'alert alert-success')
                 return redirect(url_for('index'))
             # invalid password
             else:
@@ -259,14 +264,13 @@ def avatar():
         docID = None
         username = session['username']  # getting username from session variable (to determine document's ID)
         docID = users.find_one({'username': username}).get('_id')
-        image = '../static/uploads/' + users.find_one({'_id': docID})['avatar']
+        image = '../static/uploads/' + users.find_one({'_id': docID})['avatar'] + '?' + str(random.randint(1,10000))
         #flash(image) # temp
         #flash(str(docID)) # temp
 
         avatarform = UploadForm()
 
-        if request.method == 'POST':#and avatarform.validate():
-            #flash('Filename: ' + request.files['image_file'].filename) # temp
+        if request.method == 'POST':
             if request.files['image_file'].filename[-4:].lower() != '.jpg':
                 flash('Invalid file extension. Only .jpg/.jpeg images allowed',
                             'alert alert-warning')
@@ -323,12 +327,57 @@ def password_reset():
                 mail.send(msg)
                 # and also update it in our DB
                 users.update_one({'email': newemail}, {'$set': {'password': sha256_crypt.encrypt(newpassword)}})
-                flash('Password successfully updated! Please check your inbox. You can change this password using the <a href="#">password update</a> form',
+                flash('Password successfully updated! Please check your inbox. You can change this password using the <a href="/password_update">password update</a> form',
                     'alert alert-success')
             return redirect(url_for('index'))
 
         # GET request
         return render_template('password_reset.html', pwdresetform=pwdresetform)
+
+    except Exception as e:
+        # 2be removed in final version
+        flash(e, 'alert alert-danger')
+    return redirect(url_for('index'))
+
+@app.route('/password_update/', methods=['GET', 'POST'])
+@login_required
+def password_update():
+    try:
+        pwdupdateform = PasswordUpdate(request.form)
+
+        if request.method == 'POST' and pwdupdateform.validate():
+            # so now we have new password entered twice and some 'old' password
+            # need to check the old one against our DB
+            oldpwd = pwdupdateform.oldpassword.data
+
+            client = MongoClient()
+            db = client.db
+            users = db.users  # collection 'users' in 'db' database
+
+            # to update password user mush log in so we know username
+            docID = None
+            username = session['username']
+            docID = users.find_one({'username': username}).get('_id')
+            oldpwd_in_db = users.find_one({'_id': docID})['password']
+
+            if not sha256_crypt.verify(oldpwd, oldpwd_in_db):
+                flash('Old password not found. Please enter a valid old password',
+                            'alert alert-warning')
+                return render_template('password_update.html', pwdupdateform=pwdupdateform)
+            else:
+                # old password correct. New password can't be equal to the old one
+                if pwdupdateform.oldpassword.data == pwdupdateform.newpassword.data:
+                    flash('Sorry, but the new password can\'t be the same as the old one. Please choose a different new password', 'alert alert-warning')
+                    return render_template('password_update.html', pwdupdateform=pwdupdateform)
+                else:
+                    # store new password to DB. Redirect to profile and inform user
+                    users.update_one({'_id': docID}, {'$set': {'password': sha256_crypt.encrypt(str(pwdupdateform.newpassword.data))}})
+                    flash('Password successfully updated!', 'alert alert-success')
+                    return redirect(url_for('profile'))
+        return render_template('password_update.html', pwdupdateform=pwdupdateform)
+
+        # GET request
+        return render_template('password_update.html', pwdupdateform=pwdupdateform)
 
     except Exception as e:
         # 2be removed in final version
