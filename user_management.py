@@ -55,6 +55,9 @@ class PasswordUpdate(Form):
     newpassword = PasswordField('New password', validators=[DataRequired(), EqualTo('confirm', message='Passwords must match')])
     confirm = PasswordField('Repeat new password')
 
+class Unregister(Form):
+    password = PasswordField('Password', validators=[DataRequired()])
+
 def login_required(f):
     @wraps(f)
     def wrap(*args, **kwargs):
@@ -77,16 +80,6 @@ def notloggedin_required(f):
 
 @app.route('/')
 def index():
-    try:
-        if not session:
-            flash('Hello. This is an index page. <a href="/login">Login</a> or <a href="/register">register</a>.',
-                  'alert alert-primary')
-        else:
-            flash('Hello, ' + session[
-                'user'] + '. You are logged in. Go to <a href="/profile">profile</a> or <a href="/logout">logout</a>',
-                  'alert alert-primary')
-    except Exception as e:
-        pass
     return render_template('hello.html')
 
 @app.route('/register/', methods=['GET', 'POST'])
@@ -105,10 +98,22 @@ def register():
             users = db.users  # collection 'users' in 'db' database
 
             # Let's check if username isn't already in our collection
-            if users.find_one({'username': username}) or users.find_one({'email': email}):
+            # He/she may be there already but 'soft-deleted' (already registered but then unregistered ['status': 'active' >> 'status': 'inactive'])
+            docID = None
+            status = None
+            if users.find_one({'username': username}):
+                docID = users.find_one({'username': username}).get('_id')
+                status = users.find_one({'_id': docID}).get('status')
+            if users.find_one({'email': email}):
+                docID = users.find_one({'email': email}).get('_id')
+                status = users.find_one({'_id': docID}).get('status')
+
+            if (users.find_one({'username': username}) or users.find_one({'email': email})) and status == 'active':
                 flash('Sorry, but this username or email are already taken. Please choose different credentials or <a href="/login">login</a>', 'alert alert-warning')
                 return render_template('register.html', form=form)
             else:
+                if status == 'inactive':
+                    users.remove({'_id': docID})
                 users.insert_one({'username': username, 'email': email, 'password': password, 'status': 'active', 'language': 'en', 'description': '', 'avatar': 'default.jpg'})
                 session['logged_in'] = True
                 session['username'] = username
@@ -137,15 +142,29 @@ def login():
             db = client.db
             users = db.users  # collection 'users' in 'db' database
 
-            # let's check for this login in usernames or emails
+            # let's check for this login in usernames or emails and if such user exists - let's check if it is not 'inactive' (unregistered)
             docID = None
             username = ''
             if users.find_one({'username': usernameoremail}):
                 docID = users.find_one({'username': usernameoremail}).get('_id')
-                username = usernameoremail
+                status = users.find_one({'_id': docID}).get('status')
+                if status == 'active':
+                    username = usernameoremail
+                else:
+                    flash(
+                        'Sorry, we do not recognize this username or email address. Please choose different credentials or <a href="/register/">register</a>',
+                        'alert alert-warning')
+                    return render_template('login.html', loginform=loginform)
             elif users.find_one({'email': usernameoremail}):
                 docID = users.find_one({'email': usernameoremail}).get('_id')
-                username = users.find_one({'_id': docID})['username']
+                status = users.find_one({'_id': docID}).get('status')
+                if status == 'active':
+                    username = users.find_one({'_id': docID})['username']
+                else:
+                    flash(
+                        'Sorry, we do not recognize this username or email address. Please choose different credentials or <a href="/register/">register</a>',
+                        'alert alert-warning')
+                    return render_template('login.html', loginform=loginform)
             else:
                 flash('Sorry, we do not recognize this username or email address. Please choose different credentials or <a href="/register/">register</a>', 'alert alert-warning')
                 return render_template('login.html', loginform=loginform)
@@ -155,7 +174,7 @@ def login():
             if sha256_crypt.verify(password, pwd_should_be):
                 session['logged_in'] = True
                 session['username'] = username
-                flash('Login successfull! <a href="/logout/">Logout</a>, go to <a href="/profile">profile</a> or <a href="/password_update">change password</a>', 'alert alert-success')
+                flash('Login successfull! <a href="/logout/">Logout</a> or go to <a href="/profile">profile</a>', 'alert alert-success')
                 return redirect(url_for('index'))
             # invalid password
             else:
@@ -241,7 +260,7 @@ def profile():
                     #flash('Updating DB') # temp
                     users.update_one({'_id': docID},
                                                   {'$set': datatoupdate})
-                    flash('Profile successfully updated. Now you can go to <a href="/">index page</a> or <a href="/logout">logout</a>.', 'alert alert-success')
+                    flash('Profile successfully updated. Now you can go to the <a href="/">main page</a> or <a href="/logout">logout</a>.', 'alert alert-success')
             return render_template('profile.html', profileform=profileform)
 
         # GET request
@@ -271,6 +290,10 @@ def avatar():
         avatarform = UploadForm()
 
         if request.method == 'POST':
+            if request.files['image_file'].filename == '':
+                flash('Looks like you didn\'t select any file to upload. Please choose one',
+                            'alert alert-warning')
+                return render_template('avatar.html', avatarform=avatarform, image=image)
             if request.files['image_file'].filename[-4:].lower() != '.jpg':
                 flash('Invalid file extension. Only .jpg/.jpeg images allowed',
                             'alert alert-warning')
@@ -378,6 +401,44 @@ def password_update():
 
         # GET request
         return render_template('password_update.html', pwdupdateform=pwdupdateform)
+
+    except Exception as e:
+        # 2be removed in final version
+        flash(e, 'alert alert-danger')
+    return redirect(url_for('index'))
+
+@app.route('/unregister/', methods=['GET', 'POST'])
+@login_required
+def unregister():
+    try:
+        unregform = Unregister(request.form)
+
+        if request.method == 'POST' and unregform.validate():
+            # input has been formally validated but need to check password agains our DB
+            pwd = unregform.password.data
+
+            client = MongoClient()
+            db = client.db
+            users = db.users  # collection 'users' in 'db' database
+            docID = None
+
+            username = session['username']
+            docID = users.find_one({'username': username}).get('_id')
+            pwd_in_db = users.find_one({'_id': docID})['password']
+
+            if not sha256_crypt.verify(pwd, pwd_in_db):
+                flash('Incorrect password. Try again', 'alert alert-warning')
+                return render_template('unregister.html', unregform=unregform)
+            else:
+                # soft-delete account - change 'status' field in DB from 'active' to 'inactive'
+                users.update_one({'_id': docID}, {'$set': {'status': 'inactive'}})
+                session.clear()
+                flash('Account successfully deleted. We will be missing you ;) <a href="/login">Login</a> or <a href="/register">register</a>', 'alert alert-success')
+                return redirect(url_for('index'))
+        return render_template('unregister.html', unregform=unregform)
+
+        # GET request
+        return render_template('unregister.html', unregform=unregform)
 
     except Exception as e:
         # 2be removed in final version

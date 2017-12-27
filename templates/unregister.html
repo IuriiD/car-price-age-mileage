@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% from '_formhelpers.html' import render_field %}
+
+{% block title %}Update password{% endblock %}
+
+{% block body %}
+<div align="right">
+  <b>{{ session['username'] }}:</b> <a href="/profile/">Profile</a> | <a href="/logout/">Logout</a>
+</div>
+<div>
+    <h1 class="display-4">You are about to delete your account. To confirm please enter your password in the field below once again.</h1>
+</div>
+<form role="form" action="/unregister/" method="POST">
+  <dl>
+      {{ render_field(unregform.password) }}
+  </dl>
+  <button type="submit" name="submit" class="btn btn-danger" value="Form sent">Delete account</button>
+</form>
+
+{% endblock %}

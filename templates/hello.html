@@ -6,7 +6,18 @@
 
 {% with messages = get_flashed_messages(with_categories=True) %}
     {% if not messages %}
-        <h4>Index page. <a href="/register">Register</a> | <a href="/login">Log in</a> | <a href="/logout">Logout</a> | <a href="/profile">Profile</a></h4>
+        {% if session['username'] %}
+            <h1 class="display-4">
+                Hey, <b>{{ session['username'] }}! </b>Where do you want to go next?
+            </h1>
+            <br><a href="/profile/">Profile</a> | <a href="/logout/">Logout</a>
+        {% endif %}
+        {% if not session['username'] %}
+            <h1 class="display-4">
+                Hi! Maybe you'll
+            </h1>
+            <br><a href="/login/">Log in</a> or <a href="/register/">register</a>?
+        {% endif %}
     {% endif %}
 {% endwith %}
 
