@@ -71,11 +71,11 @@ def login_required(f):
 def notloggedin_required(f):
     @wraps(f)
     def wrap(*args, **kwargs):
-        if 'logged_in' not in session:
-            return f(*args, **kwargs)
+        if 'logged_in' in session:
+            flash('You need to <a href="/logout">log out</a> first.', 'alert alert-warning')
+            return redirect(url_for('index'))
         else:
-            flash('You need to log out first', 'alert alert-warning')
-            return redirect(url_for('login'))
+            return f(*args, **kwargs)
     return wrap
 
 @app.route('/')
@@ -83,6 +83,7 @@ def index():
     return render_template('hello.html')
 
 @app.route('/register/', methods=['GET', 'POST'])
+@notloggedin_required
 def register():
     try:
         form = RegistrationForm(request.form)
@@ -129,6 +130,7 @@ def register():
         return redirect(url_for('index'))
 
 @app.route('/login/', methods=['GET', 'POST'])
+@notloggedin_required
 def login():
     try:
         loginform = LoginForm(request.form)
