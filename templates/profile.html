@@ -1,7 +1,12 @@
 {% extends "layout.html" %}
 {% from '_formhelpers.html' import render_field %}
 
+{% block title %}Profile{% endblock %}
+
 {% block body %}
+<div align="right">
+  <b>{{ session['username'] }}:</b> <a href="/avatar/">Avatar</a> | <a href="/logout/">Logout</a>
+</div>
 
 <form role="form" action="/profile/" method="POST">
   <dl>

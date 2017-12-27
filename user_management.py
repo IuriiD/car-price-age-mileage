@@ -1,14 +1,32 @@
+import os
+import imghdr
 from flask import Flask, request, render_template, url_for, redirect, session, flash
-from wtforms import Form, StringField, PasswordField, SubmitField, SelectField, TextAreaField
+from wtforms import Form, StringField, PasswordField, SubmitField, SelectField, TextAreaField, FileField
 from wtforms.validators import Length, DataRequired, Email, EqualTo
 from flask_bootstrap import Bootstrap
 from pymongo import MongoClient
 from passlib.hash import sha256_crypt
 from functools import wraps
+from flask_mail import Mail, Message
+import string, random
+
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
+
+mail = Mail(app)
+app.config.update(
+    DEBUG=True,
+    MAIL_SERVER='smtp.gmail.com',
+    MAIL_PORT=587,
+    MAIL_USE_SSL=False,
+    MAIL_USE_TLS=True,
+    MAIL_USERNAME = 'mailvulgaris@gmail.com',
+    MAIL_PASSWORD = 'flaskflask'
+)
+# ! need to reinitialize!
+mail = Mail(app)
 
 class RegistrationForm(Form):
     username = StringField('Username', validators=[Length(4, 20)])
@@ -25,6 +43,12 @@ class ProfileForm(Form):
     email = StringField('Email Address', validators=[Length(6, 50), DataRequired(), Email()])
     language = SelectField('Language', choices=[('en', 'en'), ('ua', 'ua'), ('ru', 'ru')])
     description = TextAreaField('Description', validators=[Length(max=256)])
+
+class UploadForm(Form):
+    image_file = FileField('')
+
+class PasswordReset(Form):
+    email = StringField('Email Address', validators=[Length(6, 50), DataRequired(), Email()])
 
 def login_required(f):
     @wraps(f)
@@ -80,7 +104,7 @@ def register():
                 flash('Sorry, but this username or email are already taken. Please choose different credentials or <a href="/login">login</a>', 'alert alert-warning')
                 return render_template('register.html', form=form)
             else:
-                users.insert_one({'username': username, 'email': email, 'password': password, 'status': 'active', 'language': 'en', 'description': ''})
+                users.insert_one({'username': username, 'email': email, 'password': password, 'status': 'active', 'language': 'en', 'description': '', 'avatar': 'default.jpg'})
                 session['logged_in'] = True
                 session['username'] = username
                 flash('Registration successfull! <a href="/logout/">Logout</a> or go to your <a href="/profile">profile</a>', 'alert alert-success')
@@ -223,6 +247,93 @@ def profile():
         # 2be removed in final version
         flash(e, 'alert alert-danger')
         return redirect(url_for('index'))
+
+@app.route('/avatar/', methods=['GET', 'POST'])
+@login_required
+def avatar():
+    try:
+        # get the name for the avatar image from DB (by default = default.jpg, else - str(_id).jpg)
+        client = MongoClient()
+        db = client.db
+        users = db.users  # collection 'users' in 'db' database
+        docID = None
+        username = session['username']  # getting username from session variable (to determine document's ID)
+        docID = users.find_one({'username': username}).get('_id')
+        image = '../static/uploads/' + users.find_one({'_id': docID})['avatar']
+        #flash(image) # temp
+        #flash(str(docID)) # temp
+
+        avatarform = UploadForm()
+
+        if request.method == 'POST':#and avatarform.validate():
+            #flash('Filename: ' + request.files['image_file'].filename) # temp
+            if request.files['image_file'].filename[-4:].lower() != '.jpg':
+                flash('Invalid file extension. Only .jpg/.jpeg images allowed',
+                            'alert alert-warning')
+                return render_template('avatar.html', avatarform=avatarform, image=image)
+            if imghdr.what(request.files['image_file']) != 'jpeg':
+                flash('Invalid image format. Are you sure that\'s really a .jpeg image? Please choose a different one',
+                            'alert alert-warning')
+                return render_template('avatar.html', avatarform=avatarform, image=image)
+
+            path = 'uploads/' + str(docID) + '.jpg'
+            request.files['image_file'].save(os.path.join(app.static_folder, path))
+            users.update_one({'_id': docID}, {'$set': {'avatar': str(docID)+'.jpg'}})
+            # avoid image caching
+            image = '../static/uploads/' + str(docID) + '.jpg' + '?' + str(random.randint(1,10000))
+            #flash(image) # temp
+        return render_template('avatar.html', avatarform=avatarform, image=image)
+
+        # GET request
+        return render_template('avatar.html', avatarform=avatarform, image=image)
+
+    except Exception as e:
+        # 2be removed in final version
+        flash(e, 'alert alert-danger')
+        return redirect(url_for('index'))
+
+@app.route('/password_reset/', methods=['GET', 'POST'])
+def password_reset():
+    try:
+        # password is reset in case user forgot it and can't log in
+        # any valid email can be entered, which will be checked against our DB if such user exists
+        pwdresetform = PasswordReset(request.form)
+
+        if request.method == 'POST' and pwdresetform.validate():
+            newemail = pwdresetform.email.data
+
+            client = MongoClient()
+            db = client.db
+            users = db.users  # collection 'users' in 'db' database
+
+            # if entered email is absent in our DB
+            if not users.find_one({'email': newemail}):
+                flash('No users found with such email. Please provide a correct email address',
+                            'alert alert-warning')
+                return render_template('password_reset.html', pwdresetform=pwdresetform)
+            else:
+                # generate new password
+                alphabet = string.ascii_letters + string.digits
+                newpassword = ''.join(random.choice(alphabet) for i in range(12))
+                #flash(newpassword) # temp
+
+                # and send it to user
+                msg = Message('You new password', sender="from@example.com", recipients=[newemail])
+                msg.html = 'Here\'s your new password: ' + newpassword + '<br> You can change it using <a href="#">password update</a> form'
+                mail.send(msg)
+                # and also update it in our DB
+                users.update_one({'email': newemail}, {'$set': {'password': sha256_crypt.encrypt(newpassword)}})
+                flash('Password successfully updated! Please check your inbox. You can change this password using the <a href="#">password update</a> form',
+                    'alert alert-success')
+            return redirect(url_for('index'))
+
+        # GET request
+        return render_template('password_reset.html', pwdresetform=pwdresetform)
+
+    except Exception as e:
+        # 2be removed in final version
+        flash(e, 'alert alert-danger')
+    return redirect(url_for('index'))
 
 # Run Flask server (host='0.0.0.0' - for Vagrant)
 if __name__ == '__main__':
