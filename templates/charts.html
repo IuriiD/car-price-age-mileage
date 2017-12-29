@@ -34,15 +34,10 @@
     </div>
     {% endif %}
 
-    <p>
-      <img src="{{ ch_pa }}" width="600" height="600">
-    </p>
-    <p>
-      <img src="{{ ch_pm }}" width="600" height="600">
-    </p>
-    <p>
-      <img src="{{ ch_ma }}" width="600" height="600">
-    </p>
+    {% for id in ids %}
+        <div id="{{id}}"></div>
+    {% endfor %}
+
      {% endif %}
     {% if not nodata==True %}
     <h6><a href="{{ url_for('index') }}">Back to models list</a> / {{ make }} - {{ model }}</h6>
@@ -50,11 +45,27 @@
       <div class="alert alert-light" role="alert">
         Made using <a href="https://auto.ria.com/" target="_blank">auto.ria.ua</a> <a href="https://github.com/ria-com/auto-ria-rest-api" target="_blank">API</a>
       </div>
+
+
   </div>
 
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+      <!-- D3.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
+      <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+    <!-- Plotly.js -->
+    <script src="https://d14fo0winaifog.cloudfront.net/plotly-basic.js"></script>
+    <script type="text/javascript">
+        var graphs = {{graphJSON | safe}};
+        var ids = {{ids | safe}};
+        for(var i in graphs) {
+            Plotly.plot(ids[i], // the ID of the div, created above
+                        graphs[i].data,
+                        graphs[i].layout || {});
+        }
+    </script>
   </body>
 </html>

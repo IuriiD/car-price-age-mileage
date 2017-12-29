@@ -7,7 +7,7 @@
 # we look for a collection for a given model, then for a specific ads ID and then check if ads document exists more than
 # 1 day. If so we update this ads document else we use it as is.
 
-import requests, json, pygal
+import requests, json, pygal, plotly
 from flask import Flask, render_template, url_for, session, request, redirect
 from flask_bootstrap import Bootstrap
 from pymongo import MongoClient
@@ -150,6 +150,7 @@ def getcharts(make, model):
             datafromdb.append([post['ads_id'], post['price'], post['age'], post['mileage']])
 
         # Draw charts using pygal lib
+        '''
         price_age_XY = pygal.XY(stroke=False, show_legend=False, human_readable=True, fill=False,
                                 title=u'Price($) vs. Age (years): ' + make + '-' + model,
                                 x_title='Age (years)', y_title='Price ($)', tooltip_border_radius=10, dots_size=5, width=600, height=600)
@@ -159,10 +160,28 @@ def getcharts(make, model):
         mileage_age_XY = pygal.XY(stroke=False, show_legend=False, human_readable=True, fill=False,
                                   title=u'Age (years) vs. Mileage (x1000km): ' + make + '-' + model,
                                   x_title='Mileage (x1000km)', y_title='Age (years)', tooltip_border_radius=10, dots_size=5, width=600, height=600)
+        '''
+
+        # Draw charts using plot.ly
+        price_age_chart_name = 'Price($) vs. Age (years): ' + make + '-' + model
+        price_mileage_chart_name = 'Price($) vs. Mileage (x1000km): ' + make + '-' + model
+        mileage_age_chart_name = 'Age (years) vs. Mileage (x1000km): ' + make + '-' + model
+
+        ages, prices, mileages = [], [], []
         for every_ads in datafromdb:
+            # Pygal
+            '''
             price_age_XY.add(str(every_ads[0]), [[every_ads[2], every_ads[1]]])
             price_mileage_XY.add(str(every_ads[0]), [[every_ads[3], every_ads[1]]])
             mileage_age_XY.add(str(every_ads[0]), [[every_ads[3], every_ads[2]]])
+            '''
+            # Plot.ly
+            ages.append(every_ads[2])
+            prices.append(every_ads[1])
+            mileages.append(every_ads[3])
+
+        # Pygal
+        '''
         ch_pa = 'static/' + make + '-' + model + '-' + 'price_age.svg' # name of chart price-age
         ch_pm = 'static/' + make + '-' + model + '-' + 'price_mileage.svg' # name of chart price-mileage
         ch_ma = 'static/' + make + '-' + model + '-' + 'age_mileage.svg'# name of chart mileage-age
@@ -172,14 +191,80 @@ def getcharts(make, model):
         ch_pa = '/' + ch_pa + '?' + str(randint(1,10000))
         ch_pm = '/' + ch_pm + '?' + str(randint(1,10000))
         ch_ma = '/' + ch_ma + '?' + str(randint(1,10000))
+        '''
+
+        # Plot.ly
+        graphs = [
+            dict(
+                data=[
+                    dict(
+                        x=ages,
+                        y=prices,
+                        type='scatter',
+                        mode='markers',
+                        marker={'color': 'red', 'size': "10"}
+                    ),
+                ],
+                layout=dict(
+                    title=price_age_chart_name,
+                    xaxis={'title': 'Age (years)'}, yaxis={'title': 'Price ($)'},
+                    width=700, height=600
+                )
+            ),
+            dict(
+                data=[
+                    dict(
+                        x=mileages,
+                        y=prices,
+                        type='scatter',
+                        mode='markers',
+                        marker={'color': 'blue', 'size': "10"}
+                    ),
+                ],
+                layout=dict(
+                    title=price_mileage_chart_name,
+                    xaxis={'title': 'Mileage (x1000km)'}, yaxis={'title': 'Price ($)'},
+                    width=700, height=600
+                )
+            ),
+            dict(
+                data=[
+                    dict(
+                        x=ages,
+                        y=mileages,
+                        type='scatter',
+                        mode='markers',
+                        marker={'color': 'green', 'size': "10"}
+                    ),
+                ],
+                layout=dict(
+                    title=mileage_age_chart_name,
+                    xaxis={'title': 'Age (years)'}, yaxis={'title': 'Mileage (x1000km)'},
+                    width=700, height=600
+                )
+            )
+        ]
+
+        ids = ['graph-{}'.format(i) for i, _ in enumerate(graphs)]
+        graphJSON = json.dumps(graphs, cls=plotly.utils.PlotlyJSONEncoder)
+
         # Render page using saved charts (need to decide what to do with them next)
         # But before let's check if quantity of ads is less than 5 (too little) and display additional notice for user
+        # Pygal
+        '''
         if toofewads==True:
             return render_template('charts.html', nodata=False, toofewads=True, make=make, model=model, ch_pa=ch_pa, ch_pm=ch_pm,
                                    ch_ma=ch_ma)
         else:
             return render_template('charts.html', nodata=False, toofewads=False, make=make, model=model, ch_pa=ch_pa,
                                    ch_pm=ch_pm, ch_ma=ch_ma)
+        '''
+
+        # Plot.ly
+        if toofewads==True:
+            return render_template('charts.html', nodata=False, toofewads=True, make=make, model=model, ids=ids, graphJSON=graphJSON)
+        else:
+            return render_template('charts.html', nodata=False, toofewads=False, make=make, model=model, ids=ids, graphJSON=graphJSON)
 
 # Dealing with sessions
 @app.route('/login', methods=['GET', 'POST'])
