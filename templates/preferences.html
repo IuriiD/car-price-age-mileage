@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+{% from '_formhelpers.html' import render_field %}
+
+{% block title %}Preferences{% endblock %}
+
+{% block body %}
+<div align="right">
+  <b>{{ session['username'] }}: </b> <a href="/">Main page</a> | <a href="/prifle/">Profile</a> | <a href="/logout/">Logout</a>
+</div>
+
+<form role="form" action="/preferences/" method="POST">
+  <dl>
+    {{ render_field(prefsform.ads_qty) }}
+<br>
+      <b>Charting engine:</b>
+      {% for subfield in prefsform.charting_tool %}
+        <tr>
+            <td>{{ subfield }}</td>
+            <td>{{ subfield.label }}</td>
+        </tr>
+    {% endfor %}
+  </dl>
+  <button type="submit" name="submit" class="btn btn-primary" value="Form sent">Save</button>
+</form>
+
+{% endblock %}

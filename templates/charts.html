@@ -1,61 +1,55 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <title>Correlation of car's age, mileage and price - data from auto.ria.ua</title>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+{% extends "layout.html" %}
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
-  </head>
+{% block title %}Correlation of car's age, mileage and price - data from auto.ria.ua{% endblock %}
 
-  <body>
-  <!-- Main contents container-->
-  <div class="container">
-    <br>
-    <h4>Car-Price-Age-Mileage (v.0.3)</h4>
-    <h6><a href="{{ url_for('index') }}">Back to models list</a> / {{ make }} - {{ model }}</h6>
+{% block body %}
+  {% if session['username'] %}
+    <b>{{ session['username'] }}: </b><a href="/profile/">Profile</a> | <a href="/preferences/">Preferences</a> | <a href="/logout/">Logout</a>
+  {% else %}
+    <a href="/login/">Log in</a> | <a href="/register/">Register</a>
+  {% endif %}
 
-    <!-- If we don't have any data, there will be no charts -->
-    {% if nodata==True %}
+  <h1 class="display-4">Car-Price-Age-Mileage (v.1.0)</h1>
+  <br>
+  <h6><a href="{{ url_for('index') }}">Back to models list</a> / {{ make }} - {{ model }}</h6>
+  <!-- If we don't have any data, there will be no charts -->
+  {% if nodata==True %}
     <div class="alert alert-danger" role="alert">
       Sorry, but <a href="https://auto.ria.com/" target="_blank">auto.ria.ua</a> has no adverticements for this model. Please <a href="{{ url_for('index') }}">choose</a> another model.
     </div>
-    {% endif %}
+  {% endif %}
 
-    <!-- If we have some data, let's display charts -->
-    {% if nodata==False %}
-
+  <!-- If we have some data, let's display charts -->
+  {% if nodata==False %}
     <!-- Show an alert if we have less than 5 ads -->
     {% if toofewads==True %}
-    <div class="alert alert-warning" role="alert">
-      There are very few ads on <a href="https://auto.ria.com/" target="_blank">auto.ria.ua</a> for this model - charts may be misleading.
-    </div>
+      <div class="alert alert-warning" role="alert">
+        There are very few ads on <a href="https://auto.ria.com/" target="_blank">auto.ria.ua</a> for this model - charts may be misleading.
+      </div>
     {% endif %}
 
+    {% if charting_tool=='pgl' %}
+    <figure>
+      <embed type="image/svg+xml" src="{{ ch_pa }}" width="700" height="600"/>
+    </figure>
+    <figure>
+      <embed type="image/svg+xml" src="{{ ch_pm }}" width="700" height="600"/>
+    </figure>
+    <figure>
+      <embed type="image/svg+xml" src="{{ ch_ma }}" width="700" height="600"/>
+    </figure>
+    {% endif %}
+
+    {% if charting_tool=='pltly' %}
     {% for id in ids %}
         <div id="{{id}}"></div>
     {% endfor %}
-
-     {% endif %}
-    {% if not nodata==True %}
-    <h6><a href="{{ url_for('index') }}">Back to models list</a> / {{ make }} - {{ model }}</h6>
-    {% endif %}
-      <div class="alert alert-light" role="alert">
-        Made using <a href="https://auto.ria.com/" target="_blank">auto.ria.ua</a> <a href="https://github.com/ria-com/auto-ria-rest-api" target="_blank">API</a>
-      </div>
-
-
-  </div>
-
+<!-- For some reason charts fail to draw when uploading plotly js and/or the following script via layout.html template file-->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
       <!-- D3.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
       <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
     <!-- Plotly.js -->
     <script src="https://d14fo0winaifog.cloudfront.net/plotly-basic.js"></script>
     <script type="text/javascript">
@@ -67,5 +61,11 @@
                         graphs[i].layout || {});
         }
     </script>
-  </body>
-</html>
+    {% endif %}
+  {% endif %}
+
+  {% if nodata==False %}
+    <h6><a href="{{ url_for('index') }}">Back to models list</a> / {{ make }} - {{ model }}</h6>
+  {% endif %}
+    Made by <a href="https://iuriid.github.io/" target="_blank">Iurii Dziuban</a> using <a href="https://auto.ria.com/" target="_blank">auto.ria.ua</a> <a href="https://github.com/ria-com/auto-ria-rest-api" target="_blank">API</a> in Dec 2017
+{% endblock %}

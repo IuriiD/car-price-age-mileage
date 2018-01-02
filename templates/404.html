@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+
+{% block title %}Ouups... page not found{% endblock %}
+
+{% block body %}
+
+{% with messages = get_flashed_messages(with_categories=True) %}
+    {% if not messages %}
+        <h1 class="display-4">Car-Price-Age-Mileage (v.1.0)</h1>
+        <br>
+        <h1 class="display-2">
+            Ouups... Page not found
+        </h1>
+        <br>Wanna go to the <a href="/">main page</a>?
+    {% endif %}
+{% endwith %}
+
+{% endblock %}
