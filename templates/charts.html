@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 
-{% block title %}Correlation of car's age, mileage and price - data from auto.ria.ua{% endblock %}
+{% block title %}CPAM: {{ make }} - {{ model }}{% endblock %}
 
 {% block body %}
   {% if session['username'] %}
@@ -9,7 +9,7 @@
     <a href="/login/">Log in</a> | <a href="/register/">Register</a>
   {% endif %}
 
-  <h1 class="display-4">Car-Price-Age-Mileage (v.1.0)</h1>
+  <h1 class="display-4">Car-Price-Age-Mileage (v.1.1)</h1>
   <br>
   <h6><a href="{{ url_for('index') }}">Back to models list</a> / {{ make }} - {{ model }}</h6>
   <!-- If we don't have any data, there will be no charts -->

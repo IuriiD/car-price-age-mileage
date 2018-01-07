@@ -1,20 +1,29 @@
 {% extends "layout.html" %}
+{% from '_formhelpers.html' import render_field %}
 
 {% block title %}Correlation of car's age, mileage and price - data from auto.ria.ua{% endblock %}
+
+<!-- Select2 -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
 
 {% block body %}
 
     {% if session['username'] %}
         <b>{{ session['username'] }}: </b><a href="/profile/">Profile</a> | <a href="/preferences/">Preferences</a> | <a href="/logout/">Logout</a>
-
     {% else %}
-
         <a href="/login/">Log in</a> | <a href="/register/">Register</a>
     {% endif %}
 
-    <h1 class="display-4">Car-Price-Age-Mileage (v.1.0)</h1>
-    <br>
-    <h6>Please choose a model from the list below:</h6>
+    <h1 class="display-4">Car-Price-Age-Mileage (v.1.1)</h1>
+    <p class="lead">
+        See how car's price is changing depending on its age and mileage
+    </p>
+
+    <br><br>
+    Please select a car model from the following dropdown:
+
+    <!--
     {% for makemodel in makemodellist %}
         <h4><b>{{ makemodel[0] }} </b></h4>
         {% for model in makemodel[1] %}
@@ -22,6 +31,20 @@
         {% endfor %}
         <br>
     {% endfor %}
-    Made by <a href="https://iuriid.github.io/" target="_blank">Iurii Dziuban</a> using <a href="https://auto.ria.com/" target="_blank">auto.ria.ua</a> <a href="https://github.com/ria-com/auto-ria-rest-api" target="_blank">API</a> in Dec 2017
+    -->
 
+    <form role="form" action="/" method="POST">
+        <dl>
+            {{ render_field(indexform.makemodels) }}
+        </dl>
+        <button type="submit" name="submit" class="btn btn-primary" value="Form sent">Get results</button>
+    </form>
+    <br>
+    <script>
+        $(document).ready(function() {
+            $('.js-example-basic-single').select2();
+        });
+    </script>
+    Made by <a href="https://iuriid.github.io/" target="_blank">Iurii Dziuban</a> using <a href="https://auto.ria.com/" target="_blank">auto.ria.ua</a> <a href="https://github.com/ria-com/auto-ria-rest-api" target="_blank">API</a> in Dec 2017
 {% endblock %}
+

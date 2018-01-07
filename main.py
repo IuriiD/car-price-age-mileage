@@ -51,6 +51,36 @@ app.config.update(
 # ! need to reinitialize!
 mail = Mail(app)
 
+# Prepare a list of makes/models for index page
+client = MongoClient()
+db = client.makemodels
+makesmodelscll = db.makesmodelscll  # collection for 'make name/make ID/model name/model ID's (~3.7k docs)
+mks = db.makes  # collection for 'make name/make ID's (~265 docs)
+
+# Prepare a list of makes
+makes = []
+for doc in mks.find():
+    makes.append(doc['make'])
+makes = sorted(makes)
+
+# Prepare a list of urls ('/make_name/model_name')
+makemodellist = []
+for make in makes:
+    models4make = []
+    for doc in makesmodelscll.find({'make': make}):
+        models4make.append('/' + doc['make'] + '/' + doc['model'])
+    # Make a list in format [[make_name1, [model_name1, model_name2, model_name3, ...]], [make_name2, [model_name1, model_name2, model_name3, ...]], ...]
+    makemodellist.append([make, sorted(models4make)])
+    makemodellist = sorted(makemodellist)
+    makemodeloutput = []
+    for make in makemodellist:
+        for model in make[1]:
+            modelname = model.split('/')[1]+' '+model.split('/')[2]
+            makemodeloutput.append((model, modelname))
+
+class IndexForm(Form):
+    makemodels = SelectField('', choices=makemodeloutput)
+
 class RegistrationForm(Form):
     username = StringField('Username', validators=[Length(4, 20)])
     email = StringField('Email Address', validators=[Length(6, 50), DataRequired(), Email()])
@@ -110,32 +140,26 @@ def notloggedin_required(f):
 #
 # Let's make an index page with a list of models for user to choose from
 # Flask decorator, index page
-@app.route('/')
-@app.route('/index/')
+@app.route('/index/', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    client = MongoClient()
-    db = client.makemodels
-    makesmodelscll = db.makesmodelscll # collection for 'make name/make ID/model name/model ID's (~3.7k docs)
-    mks = db.makes # collection for 'make name/make ID's (~265 docs)
+    try:
+        indexform = IndexForm(request.form)
+        #flash(makemodeloutput)
 
-    # Prepare a list of makes
-    makes = []
-    for doc in mks.find():
-        makes.append(doc['make'])
-    makes = sorted(makes)
+        # POST-request
+        if request.method == 'POST' and indexform.validate():
+            makemodelurl = indexform.makemodels.data
+            return redirect(makemodelurl)
 
-    # Prepare a list of urls ('/make_name/model_name')
-    makemodellist = []
-    for make in makes:
-        models4make = []
-        for doc in makesmodelscll.find({'make': make}):
-            models4make.append('/' + doc['make'] + '/' + doc['model'])
-        # Make a list in format [[make_name1, [model_name1, model_name2, model_name3, ...]], [make_name2, [model_name1, model_name2, model_name3, ...]], ...]
-        makemodellist.append([make, sorted(models4make)])
-        makemodellist = sorted(makemodellist)
+        # the first (GET) request for a index page
+        return render_template('index.html', makemodellist=makemodellist, indexform=indexform)
 
-    # Render html with our list passed
-    return render_template('index.html', makemodellist=makemodellist)
+    except Exception as e:
+        # 2be removed in final version
+        #flash(e, 'alert alert-danger')
+        return redirect(url_for('index'))
+
 
 # A page with charts for a model chosen by user
 @app.route('/<make>/<model>')
@@ -406,7 +430,7 @@ def register():
 
     except Exception as e:
         # 2be removed in final version
-        flash(e, 'alert alert-danger')
+        #flash(e, 'alert alert-danger')
         return redirect(url_for('index'))
 
 @app.route('/login/', methods=['GET', 'POST'])
@@ -471,7 +495,7 @@ def login():
 
     except Exception as e:
         # 2be removed in final version
-        flash(e, 'alert alert-danger')
+        #flash(e, 'alert alert-danger')
         return redirect(url_for('index'))
 
 @app.route('/logout/')
@@ -557,7 +581,7 @@ def profile():
 
     except Exception as e:
         # 2be removed in final version
-        flash(e, 'alert alert-danger')
+        #flash(e, 'alert alert-danger')
         return redirect(url_for('index'))
 
 @app.route('/avatar/', methods=['GET', 'POST'])
@@ -599,6 +623,8 @@ def avatar():
             # avoid image caching
             image = '../static/uploads/' + str(docID) + '.jpg' + '?' + str(random.randint(1, 10000))
             # flash(image) # temp
+            flash(
+                'Avatar successfully updated!', 'alert alert-success')
         return render_template('avatar.html', avatarform=avatarform, image=image)
 
         # GET request
@@ -606,7 +632,7 @@ def avatar():
 
     except Exception as e:
         # 2be removed in final version
-        flash(e, 'alert alert-danger')
+        #flash(e, 'alert alert-danger')
         return redirect(url_for('index'))
 
 @app.route('/password_reset/', methods=['GET', 'POST'])
@@ -650,8 +676,8 @@ def password_reset():
 
     except Exception as e:
         # 2be removed in final version
-        flash(e, 'alert alert-danger')
-    return redirect(url_for('index'))
+        #flash(e, 'alert alert-danger')
+        return redirect(url_for('index'))
 
 @app.route('/password_update/', methods=['GET', 'POST'])
 @login_required
@@ -698,8 +724,8 @@ def password_update():
 
     except Exception as e:
         # 2be removed in final version
-        flash(e, 'alert alert-danger')
-    return redirect(url_for('index'))
+        #flash(e, 'alert alert-danger')
+        return redirect(url_for('index'))
 
 @app.route('/unregister/', methods=['GET', 'POST'])
 @login_required
@@ -738,8 +764,8 @@ def unregister():
 
     except Exception as e:
         # 2be removed in final version
-        flash(e, 'alert alert-danger')
-    return redirect(url_for('index'))
+        #flash(e, 'alert alert-danger')
+        return redirect(url_for('index'))
 
 @app.route('/preferences/', methods=['GET', 'POST'])
 @login_required
@@ -762,7 +788,7 @@ def preferences():
             if prefsform.validate():
                 # save updated data to db:
                 # check for data to be updated
-                datatoupdate = {}
+                datatoupdate = {} 
                 ads_qty_flag, charting_tool_flag = False, False
                 if ads_qty != int(prefsform.ads_qty.data):
                     ads_qty_flag = True
@@ -786,7 +812,7 @@ def preferences():
 
     except Exception as e:
         # 2be removed in final version
-        flash(e, 'alert alert-danger')
+        #flash(e, 'alert alert-danger')
         return redirect(url_for('index'))
 
 @app.errorhandler(404)

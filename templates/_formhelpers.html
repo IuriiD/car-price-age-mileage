@@ -1,7 +1,7 @@
 {% macro render_field(field) %}
 
 <dt>{{ field.label }}
-<dd>{{ field(class_="form-control")|safe }} <!-- class_="form-control", - for custom styles -->
+<dd>{{ field(class_="js-example-basic-single form-control")|safe }} <!-- class_="form-control", - for custom styles -->
     {% if field.errors %}
     <br>
     <div class="alert alert-warning" role="alert">
