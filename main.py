@@ -1,24 +1,24 @@
 # Iurii Dziuban -- https://iuriid.github.io/ -- iurii.dziuban@gmail.com -- Nov-Dec 2017
 
 # My 1st real miniproject. Started on ~01.11.2017 after learning Python/coding for ~175 hours (3-3.5months) in total.
-# Version 1.0 (with user management, preferences and charting with both pygal and plot.ly finished on 02.01.2018, ~248h, delta=73h)
+# Major version 1.0 (with user management, preferences and charting with both pygal and plot.ly finished on 02.01.2018, ~248h, delta=73h)
 # This service which during development was called 'Car-price-age-mileage' or CPAM requests data for a given car model
 # from auto.ria.ua using their API (https://github.com/ria-com/auto-ria-rest-api) and draws scatter charts (using 2 charting
-# engines/libraries - pygal and plot.ly) for age-price, price-mileage and age-mileage.
+# engines/libraries - pygal and plot.ly) for age & price, price & mileage and age & mileage.
 # Has user management system (register, login, profile update, password update, password reset, avatar) and a preferences
 # page where user can change 2 parameters: adverticements quantity for the model being analyzed (5-50; auto.ria.ua API's)
 # restriction is 500 requests/hour) and charting engine. Uses MongoDB, Flask, pygal, plot.ly
 
-# At deployment makemodels2DB.py script is run manually which creates a MongoDB 'makemodels' with 2 collections:
+# At deployment makemodels2DB.py script should be run manually which creates a MongoDB 'makemodels' with 2 collections:
 # 1) 'makes" ('make name/make ID') and
 # 2) 'makesmodelscll' ('make name/make ID/model name/model ID').
-# All data used for charting (price/age/mileage and ads IDs) are stored in MongoDB 'makemodels', collections 'X-Y',
-# where 'X' - make ID, 'Y' - model ID. Collections for each model are updated if needed.
+# All data used for charting (price/age/mileage and ads IDs) are stored in MongoDB 'makemodels', in collections 'X-Y',
+# where 'X' - make ID, 'Y' - model ID. Collections for each model are updated at every request if needed.
 
 import os
 import imghdr
 import requests, json, plotly, pygal
-from flask import Flask, render_template, url_for, session, request, redirect, session, flash
+from flask import Flask, render_template, url_for, session, request, redirect, flash
 from wtforms import Form, StringField, PasswordField, SelectField, TextAreaField, FileField, RadioField, IntegerField
 from wtforms.validators import Length, DataRequired, Email, EqualTo, NumberRange
 from flask_bootstrap import Bootstrap
@@ -29,10 +29,6 @@ from passlib.hash import sha256_crypt
 from functools import wraps
 from flask_mail import Mail, Message
 import string, random
-
-# Moved to def getcharts()
-# ads_analysed = 20 # quantity of adverticements requested for analysis
-# charting_tool = 'pltly'
 
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
@@ -788,7 +784,7 @@ def preferences():
             if prefsform.validate():
                 # save updated data to db:
                 # check for data to be updated
-                datatoupdate = {} 
+                datatoupdate = {}
                 ads_qty_flag, charting_tool_flag = False, False
                 if ads_qty != int(prefsform.ads_qty.data):
                     ads_qty_flag = True
