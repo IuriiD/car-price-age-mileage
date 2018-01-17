@@ -7,15 +7,12 @@ Charts (for age & price, price & mileage and age & mileage) are drawn using 2 ch
 About 50% of time working on this miniproject was spent learning how to create a user management system in Flask (register, login, profile update, password update, password reset, avatar functions).
 App has a preferences page (accessible for registered and logged in users) where a user can change 2 parameters: adverticements quantity for the model being analyzed (5-50) and the charting engine.
 Topics learnt/covered in this project: Flask (including user management system), vagrant, git, virtualenv, REST API, requests, JSON parsing, charting (pygal, plot.ly), databases (MongoDB), bootstrap, deployment to server.
-<div class="row">
-        <div class="col">
-          <a href="img/cpam-1.jpg" target="_blank"><img src="img/cpam-1.jpg" class="img-fluid img-thumbnail" style="max-width: 350px"></a>
-        </div>
-        <div class="col">
-          <a href="img/cpam-2.jpg" target="_blank"><img src="img/cpam-2.jpg" class="img-fluid img-thumbnail" style="max-width: 350px"></a>
-        </div>
-        <div class="col">
-          <a href="img/cpam-3.jpg" target="_blank"><img src="img/cpam-3.jpg" class="img-fluid img-thumbnail" style="max-width: 350px"></a>
-        </div>
-    </div>
+<p>
+    <a href="https://iuriid.github.io/img/cpam-1.jpg" target="_blank"><img src="https://iuriid.github.io/img/cpam-1.jpg" class="img-fluid img-thumbnail" style="max-width: 350px"></a>
+</p>
+<p>
+    <a href="https://iuriid.github.io/img/cpam-2.jpg" target="_blank"><img src="https://iuriid.github.io/img/cpam-2.jpg" class="img-fluid img-thumbnail" style="max-width: 350px"></a>
+</p>
+<p>
+    <a href="https://iuriid.github.io/img/cpam-3.jpg" target="_blank"><img src="https://iuriid.github.io/img/cpam-3.jpg" class="img-fluid img-thumbnail" style="max-width: 350px"></a>
 </p>
