@@ -13,11 +13,11 @@ App has a preferences page (accessible for registered and logged in users) where
 <br>
 <br>Topics learnt/covered in this project: <i>Flask (including user management system), vagrant, git, virtualenv, REST API (auto.ria.ua), requests, JSON parsing, charting (pygal, plot.ly), MongoDB, bootstrap, deployment to server.</i>
 <p>
-    <a href="https://iuriid.github.io/public/img/cpam-1.jpg" target="_blank"><img src="https://iuriid.github.io/img/cpam-1.jpg" class="img-fluid img-thumbnail" style="max-width: 350px"></a>
+    <a href="https://iuriid.github.io/public/img/cpam-1.jpg" target="_blank"><img src="https://iuriid.github.io/public/img/cpam-1.jpg" class="img-fluid img-thumbnail" style="max-width: 350px"></a>
 </p>
 <p>
-    <a href="https://iuriid.github.io/public/img/cpam-2.jpg" target="_blank"><img src="https://iuriid.github.io/img/cpam-2.jpg" class="img-fluid img-thumbnail" style="max-width: 350px"></a>
+    <a href="https://iuriid.github.io/public/img/cpam-2.jpg" target="_blank"><img src="https://iuriid.github.io/public/img/cpam-2.jpg" class="img-fluid img-thumbnail" style="max-width: 350px"></a>
 </p>
 <p>
-    <a href="https://iuriid.github.io/public/img/cpam-3.jpg" target="_blank"><img src="https://iuriid.github.io/img/cpam-3.jpg" class="img-fluid img-thumbnail" style="max-width: 350px"></a>
+    <a href="https://iuriid.github.io/public/img/cpam-3.jpg" target="_blank"><img src="https://iuriid.github.io/public/img/cpam-3.jpg" class="img-fluid img-thumbnail" style="max-width: 350px"></a>
 </p>
