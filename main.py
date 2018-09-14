@@ -24,7 +24,7 @@ from wtforms.validators import Length, DataRequired, Email, EqualTo, NumberRange
 from flask_bootstrap import Bootstrap
 from pymongo import MongoClient
 from cpam_functions import simplifydic, get_price_age_mileage
-from keys import api_key, app_secret_key
+from keys import api_key, app_secret_key, mail_pwd
 from passlib.hash import sha256_crypt
 from functools import wraps
 from flask_mail import Mail, Message
@@ -42,7 +42,7 @@ app.config.update(
     MAIL_USE_SSL=False,
     MAIL_USE_TLS=True,
     MAIL_USERNAME = 'mailvulgaris@gmail.com',
-    MAIL_PASSWORD = 'flaskflask'
+    MAIL_PASSWORD = mail_pwd
 )
 # ! need to reinitialize!
 mail = Mail(app)
